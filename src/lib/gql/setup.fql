@@ -1,0 +1,42 @@
+// * Schema must be uploaded before setup!
+
+// Auth
+
+// Login with only email
+// * consider a refresh token strategy. Currently, we're going w/ a minimal working implementation.
+Update(Function('login_user'), {
+  body: Query(
+    Lambda(
+      ['input'],
+      Do(
+        // If user doesn't exist, create
+        If(
+          IsEmpty(
+            Match(Index('unique_User_email'), Select('email', Var('input')))
+          ),
+          Create(Collection('User'), {
+            data: Var('input'),
+          }),
+          false
+        ),
+        // Return auth and user info
+        Let(
+          {
+            userDoc: Get(
+              Match(Index('unique_User_email'), Select('email', Var('input')))
+            ),
+            tokenDoc: Create(Tokens(), {
+              instance: Select('ref', Var('userDoc')),
+              ttl: TimeAdd(Now(), 30, 'days'),
+            }),
+          },
+          {
+            userInfo: Select('data', Var('userDoc')),
+            exp: Select('ttl', Var('tokenDoc')),
+            token: Select('secret', Var('tokenDoc')),
+          }
+        )
+      )
+    )
+  ),
+})
