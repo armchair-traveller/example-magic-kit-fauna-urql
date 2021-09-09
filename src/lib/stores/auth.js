@@ -1,16 +1,19 @@
+import { browser } from '$app/env'
 import { goto } from '$app/navigation'
 import { Magic } from 'magic-sdk'
 import { derived, get, writable } from 'svelte/store'
 
 const initAuth = { token: null, exp: null, userInfo: {} }
 function createAuth() {
-  if (typeof window == 'undefined') return writable(initAuth)
-  var userInfo = localStorage.getItem('userInfo')
-  return writable({
-    token: localStorage.getItem('token'),
-    exp: localStorage.getItem('exp'),
-    userInfo: userInfo ? JSON.parse(userInfo) : {},
-  })
+  if (browser) {
+    var userInfo = localStorage.getItem('userInfo')
+    return writable({
+      token: localStorage.getItem('token'),
+      exp: localStorage.getItem('exp'),
+      userInfo: userInfo ? JSON.parse(userInfo) : {},
+    })
+  }
+  return writable(initAuth)
 }
 
 export const auth = createAuth()
@@ -27,38 +30,15 @@ export const isAuthenticated = derived(auth, ({ token, exp }) =>
 )
 
 // *** Methods requiring async below ***
-/**
- * Automatically takes care sending JSON if object, and parsing JSON responses.
- * @param {string} route - path after base route
- * @param {object} init
- * @returns {object|Response}
- */
-async function q(route, { ...init } = {}) {
-  if (init.body && typeof init.body == 'object') {
-    init.body = JSON.stringify(init.body)
-    init.headers ??= {}
-    init.headers['Content-type'] = 'application/json'
-  }
 
-  const resp = await fetch(
-    `${
-      import.meta.env.PROD
-        ? import.meta.env.VITE_API_URL
-        : import.meta.env.VITE_DEV_API_URL
-    }${route}`,
-    init
-  )
-  if (resp.headers.get('Content-type') == 'application/json')
-    return await resp.json()
-
-  return resp
-}
-
-/** Any method can be used as a property through proxy e.g.
+/** Fetch preset for querying your API, base URL defined in `.env`
+ * Any method can be used as a property made possible through Proxy constructor e.g.
  * ```js
- * query.get('/route', {body:{}})
+ * apiQ.get('/route', {body:{}})
  * ```
- * It's an axios/express-like API
+ * It's an axios/express-like API.
+ *
+ * To access raw fetch, use fetch prop. e.g. `apiQ.fetch()`
  */
 export const apiQ = {
   __proto__: new Proxy(
@@ -67,47 +47,61 @@ export const apiQ = {
       get:
         (target, prop) =>
         (route, init = {}) =>
-          q(route, { method: prop.toUpperCase(), ...init }),
+          apiQ.fetch(route, { method: prop.toUpperCase(), ...init }),
     }
   ),
-  fetch: q,
-}
+  /**
+   * Automatically takes care sending JSON if object, and parsing JSON responses.
+   * @param {string} route - path after base route
+   * @param {object} init
+   * @returns {object|Response} Response, parsed if viable.
+   */
+  fetch(route, { ...init } = {}) {
+    if (init.body && typeof init.body == 'object') {
+      init.body = JSON.stringify(init.body)
+      init.headers ??= {}
+      init.headers['Content-type'] = 'application/json'
+    }
 
-/** The didToken is basically the user's password. Used to verify them
- * @param {string} email
- * @param {string} didToken
- * @returns {Promise}
- * ```js
- * //authState
- * {
- *   token,
- *   exp,
- *   userInfo: { email }
- * }
- * ```
- */
-export function apiLogin(email, didToken) {
-  return apiQ.post('/login', {
-    headers: { Authorization: `Bearer ${didToken}` },
-    body: { email },
-  })
-}
+    const resp = await fetch(
+      `${
+        import.meta.env.PROD
+          ? import.meta.env.VITE_API_URL
+          : import.meta.env.VITE_DEV_API_URL
+      }${route}`,
+      init
+    )
+    if (resp.headers.get('Content-type') == 'application/json')
+      return await resp.json()
 
-// apparently logging in endpoint can also act as refreshing tokens. Basically equivalent
-// only difference is how magic on the frontend is handled to get didToken again
-export const apiRefresh = apiLogin
+    return resp
+  },
+}
 
 const m = new Magic(import.meta.env.VITE_MAGIC_PUBLIC)
 
-/** Login with an email and return new auth state, else return undefined */
-export async function login(email) {
+/** Login with an email and return new auth state, no return on errors. Signup uses exact same logic.
+ *
+ * Can also act as token refresh. Basically equivalent, only difference being how Magic gets didToken again.
+ *
+ * Enable refresh mode via configuration param. Default `false`
+ */
+export async function login({
+  email = get(auth).userInfo?.email,
+  refresh = false,
+}) {
   try {
-    const didToken = await m.auth.loginWithMagicLink({
-      email,
-    })
+    const didToken = await (refresh
+      ? m.user.getIdToken()
+      : m.auth.loginWithMagicLink({
+          email,
+        }))
     // Validate the did token on the server
     if (didToken) {
-      const authPayload = await apiLogin(email, didToken)
+      const authPayload = await apiQ.post('/login', {
+        headers: { Authorization: `Bearer ${didToken}` },
+        body: { email },
+      })
       // Finish up login
       if (authPayload?.token) {
         setAuthState(authPayload)
@@ -117,23 +111,6 @@ export async function login(email) {
   } catch (error) {
     console.log(error)
   }
-}
-
-/** Refresh if possible and return new auth state, else return undefined. */
-export async function refresh() {
-  var authState
-  try {
-    const { email } = get(auth)
-    // we won't even bother checking m.user.isloggedIn() in b/c backend will validate
-    const authPayload = await apiRefresh(email, await m.user.getIdToken())
-    if (authPayload?.token) {
-      authState = authPayload
-      setAuthState(authPayload)
-    }
-  } catch (error) {
-    console.log(error)
-  }
-  return authState
 }
 
 /** Remove token and log out of Magic, then go to login page */
