@@ -1,15 +1,16 @@
-// * Schema must be uploaded before setup!
+// * Schema must be uploaded before setup script!
+// * Please run blocks one at a time to prevent conflicts
 
 // Auth
 
-// Login with only email
+// Login with only email, for User collection/type
 // * consider a refresh token strategy. Currently, we're going w/ a minimal working implementation.
 Update(Function('login_user'), {
   body: Query(
     Lambda(
       ['input'],
       Do(
-        // If user doesn't exist, create
+        // Create user if doesn't exist
         If(
           IsEmpty(
             Match(Index('unique_User_email'), Select('email', Var('input')))
@@ -19,19 +20,24 @@ Update(Function('login_user'), {
           }),
           false
         ),
-        // Return auth and user info
+        // Auth and user info payload
         Let(
           {
-            userDoc: Get(
-              Match(Index('unique_User_email'), Select('email', Var('input')))
+            userRef: Select(
+              'ref',
+              Get(
+                Match(Index('unique_User_email'), Select('email', Var('input')))
+              )
             ),
             tokenDoc: Create(Tokens(), {
-              instance: Select('ref', Var('userDoc')),
-              ttl: TimeAdd(Now(), 30, 'days'),
+              instance: Var('userRef'),
+              // ⚙ Adjust access token expiry here
+              // ? Need a shorter active token expiry? Typically secure apps go 10m/20m/1hr, if user data security
+              ttl: TimeAdd(Now(), 30, 'days'), // doesn't matter in your app, you can increase the access token duration.
             }),
           },
           {
-            userInfo: Select('data', Var('userDoc')),
+            userInfo: Var('userRef'), // Fauna GraphQL internally codegens Get() using FQL payload's doc ref of the type/collection
             exp: Select('ttl', Var('tokenDoc')),
             token: Select('secret', Var('tokenDoc')),
           }
