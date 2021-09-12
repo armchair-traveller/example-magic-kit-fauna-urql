@@ -1,6 +1,7 @@
 <script>
 import { goto } from '$app/navigation'
 import { isAuthenticated, login } from '$lib/stores/auth'
+import { Magic } from 'magic-sdk' // Static import Magic. Even if dynamic, will be tree shaken & cached, interchangeably.
 
 let value, disabled, title, success, error
 // If at any point the user is authenticated, before or after, redirect to main app
@@ -16,7 +17,8 @@ async function submitLogin() {
       `${loggingInMsg}${'.'.repeat(++numDots <= 3 ? numDots : (numDots = 1))}`)
   animatedMsg()
   const intervalDots = setInterval(animatedMsg, 1000)
-  const payload = await login({ email })
+  const magic = new Magic(import.meta.env.VITE_MAGIC_PUBLIC)
+  const payload = await login({ email, magic })
   clearInterval(intervalDots)
   // It's just an email, and will redirect on success. Magic takes care of the validation.
   if (payload) success = value = "Success! We'll escort you right away."
