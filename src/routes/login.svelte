@@ -18,12 +18,13 @@ async function submitLogin() {
   const intervalDots = setInterval(animatedMsg, 1000)
   const payload = await login({ email })
   clearInterval(intervalDots)
+  // It's just an email, and will redirect on success. Magic takes care of the validation.
   if (payload) success = value = "Success! We'll escort you right away."
+  // Only error possible is network.
   else {
     disabled = title = null
     error = value = email
   }
-  // It's just an email, and will redirect on success. Magic takes care of the validation. Only error possible is network.
 }
 </script>
 
