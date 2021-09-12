@@ -56,7 +56,7 @@ export const apiQ = {
    * @param {object} init
    * @returns {object|Response} Response, parsed if viable.
    */
-  fetch(route, { ...init } = {}) {
+  async fetch(route, { ...init } = {}) {
     if (init.body && typeof init.body == 'object') {
       init.body = JSON.stringify(init.body)
       init.headers ??= {}
@@ -78,18 +78,19 @@ export const apiQ = {
   },
 }
 
-const m = new Magic(import.meta.env.VITE_MAGIC_PUBLIC)
+const magic = () => new Magic(import.meta.env.VITE_MAGIC_PUBLIC)
 
-/** Login with an email and return new auth state, no return on errors. Signup uses exact same logic.
+/** Handles login+signup or refresh. Returns new auth state & no return on errors. Signup uses exact same logic.
  *
- * Can also act as token refresh. Basically equivalent, only difference being how Magic gets didToken again.
+ * Token refresh and login are basically equivalent, only difference being how Magic gets the didToken again.
  *
- * Enable refresh mode via configuration param. Default `false`
+ * Enable `refresh` mode via configuration param. Default `false`
  */
 export async function login({
   email = get(auth).userInfo?.email,
   refresh = false,
 }) {
+  const m = magic()
   try {
     const didToken = await (refresh
       ? m.user.getIdToken()
@@ -115,7 +116,7 @@ export async function login({
 
 /** Remove token and log out of Magic, then go to login page */
 export async function logout() {
-  const mLogoutProm = m.user.logout()
+  const mLogoutProm = magic().user.logout()
   localStorage.removeItem('token')
   localStorage.removeItem('exp')
   localStorage.removeItem('userInfo')
