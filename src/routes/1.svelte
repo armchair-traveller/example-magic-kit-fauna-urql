@@ -1,8 +1,6 @@
 <script>
-import { mutationOp, queryOp } from '$lib/gql/urql'
+import { queryOp, mutationOp } from '$lib/gql/urql'
 import { gql, operationStore, mutation, query } from '@urql/svelte'
-//import { isAuthenticated } from '$lib/stores/auth'
-// console.log($isAuthenticated)
 const arm = query(
   operationStore(gql`
     query FindArmchair {
@@ -26,15 +24,14 @@ const changeEmail = mutation(
 )
 </script>
 
-<a href="/login" sveltekit:prefetch>Login</a>
 {#if email}
   <h1>
     {email}
   </h1>
 {/if}
 
-<button on:click={() => changeEmail({ email: 'I changed on home' })}
+<button on:click={() => changeEmail({ email: 'I changed on another page' })}
   >Do da change</button
 >
 
-<a href="/1" sveltekit:prefetch>Take me to another page</a>
+<a href="/" sveltekit:prefetch>Take me home</a>

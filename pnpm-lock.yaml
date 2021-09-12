@@ -18,14 +18,16 @@ specifiers:
   svelte-preprocess: ^4.7.4
   tailwindcss: ^2.2.4
 
+dependencies:
+  '@urql/exchange-graphcache': 4.3.3_graphql@15.5.3
+  '@urql/svelte': 1.3.0_graphql@15.5.3+svelte@3.42.4
+
 devDependencies:
   '@graphql-codegen/cli': 2.2.0_graphql@15.5.3
   '@graphql-codegen/urql-introspection': 2.1.0_graphql@15.5.3
   '@sveltejs/kit': 1.0.0-next.163_svelte@3.42.4
   '@urql/devtools': 2.0.3_graphql@15.5.3
   '@urql/exchange-auth': 0.1.6_graphql@15.5.3
-  '@urql/exchange-graphcache': 4.3.3_graphql@15.5.3
-  '@urql/svelte': 1.3.0_graphql@15.5.3+svelte@3.42.4
   autoprefixer: 10.3.3_postcss@8.3.6
   cssnano: 5.0.8_postcss@8.3.6
   graphql: 15.5.3
@@ -769,7 +771,6 @@ packages:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0
     dependencies:
       graphql: 15.5.3
-    dev: true
 
   /@iarna/toml/2.2.5:
     resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
@@ -1001,7 +1002,6 @@ packages:
       '@graphql-typed-document-node/core': 3.1.0_graphql@15.5.3
       graphql: 15.5.3
       wonka: 4.0.15
-    dev: true
 
   /@urql/devtools/2.0.3_graphql@15.5.3:
     resolution: {integrity: sha512-TktPLiBS9LcBPHD6qcnb8wqOVcg3Bx0iCtvQ80uPpfofwwBGJmqnQTjUdEFU6kwaLOFZULQ9+Uo4831G823mQw==}
@@ -1031,7 +1031,7 @@ packages:
       '@urql/core': 2.3.1_graphql@15.5.3
       graphql: 15.5.3
       wonka: 4.0.15
-    dev: true
+    dev: false
 
   /@urql/introspection/0.3.0_graphql@15.5.3:
     resolution: {integrity: sha512-dw87YiSmCgEUFnWj7fYu+wnrFcSEhYyQ8DykTvL1UzCKPm9uLDeey1z0yiSxZeX2qP9oD+TSGIq+61AZHhQO0w==}
@@ -1051,7 +1051,7 @@ packages:
       graphql: 15.5.3
       svelte: 3.42.4
       wonka: 4.0.15
-    dev: true
+    dev: false
 
   /abort-controller/3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -4933,7 +4933,6 @@ packages:
 
   /wonka/4.0.15:
     resolution: {integrity: sha512-U0IUQHKXXn6PFo9nqsHphVCE5m3IntqZNB9Jjn7EB1lrR7YTDY3YWgFvEvwniTzXSvOH/XMzAZaIfJF/LvHYXg==}
-    dev: true
 
   /wrap-ansi/3.0.1:
     resolution: {integrity: sha1-KIoE2H7aXChuBg3+jxNc6NAH+Lo=}
