@@ -1,6 +1,5 @@
 import { browser } from '$app/env'
 import { goto } from '$app/navigation'
-import { Magic } from 'magic-sdk'
 import { derived, get, writable } from 'svelte/store'
 
 const initAuth = { token: null, exp: null, userInfo: {} }
@@ -29,7 +28,7 @@ export const isAuthenticated = derived(auth, ({ token, exp }) =>
   !token || !exp ? false : new Date() < new Date(exp)
 )
 
-// *** Methods requiring async below ***
+// *** Functions requiring async below ***
 
 /** Fetch preset for querying your API, base URL defined in `.env`
  * Any method can be used as a property made possible through Proxy constructor e.g.
@@ -78,7 +77,10 @@ export const apiQ = {
   },
 }
 
-const magic = () => new Magic(import.meta.env.VITE_MAGIC_PUBLIC)
+async function magic() {
+  const { Magic } = await import('magic-sdk')
+  return new Magic(import.meta.env.VITE_MAGIC_PUBLIC)
+}
 
 /** Handles login+signup or refresh. Returns new auth state & no return on errors. Signup uses exact same logic.
  *
@@ -90,7 +92,7 @@ export async function login({
   email = get(auth).userInfo?.email,
   refresh = false,
 }) {
-  const m = magic()
+  const m = await magic()
   try {
     const didToken = await (refresh
       ? m.user.getIdToken()
@@ -116,7 +118,7 @@ export async function login({
 
 /** Remove token and log out of Magic, then go to login page */
 export async function logout() {
-  const mLogoutProm = magic().user.logout()
+  const mLogoutProm = magic().then((m) => m.user.logout())
   localStorage.removeItem('token')
   localStorage.removeItem('exp')
   localStorage.removeItem('userInfo')
