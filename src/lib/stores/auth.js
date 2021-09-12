@@ -1,6 +1,5 @@
 import { browser } from '$app/env'
 import { goto } from '$app/navigation'
-import { Magic } from 'magic-sdk'
 import { derived, get, writable } from 'svelte/store'
 
 const initAuth = { token: null, exp: null, userInfo: {} }
@@ -29,7 +28,7 @@ export const isAuthenticated = derived(auth, ({ token, exp }) =>
   !token || !exp ? false : new Date() < new Date(exp)
 )
 
-// *** Methods requiring async below ***
+// *** Functions requiring async below ***
 
 /** Fetch preset for querying your API, base URL defined in `.env`
  * Any method can be used as a property made possible through Proxy constructor e.g.
@@ -52,11 +51,11 @@ export const apiQ = {
   ),
   /**
    * Automatically takes care sending JSON if object, and parsing JSON responses.
-   * @param {string} route - path after base route
+   * @param {string} route Path after base route
    * @param {object} init
    * @returns {object|Response} Response, parsed if viable.
    */
-  fetch(route, { ...init } = {}) {
+  async fetch(route, { ...init } = {}) {
     if (init.body && typeof init.body == 'object') {
       init.body = JSON.stringify(init.body)
       init.headers ??= {}
@@ -78,18 +77,25 @@ export const apiQ = {
   },
 }
 
-const m = new Magic(import.meta.env.VITE_MAGIC_PUBLIC)
+async function magic() {
+  const { Magic } = await import('magic-sdk')
+  return new Magic(import.meta.env.VITE_MAGIC_PUBLIC)
+}
 
-/** Login with an email and return new auth state, no return on errors. Signup uses exact same logic.
+/** Handles login+signup or refresh. Returns new auth state & no return on errors. Signup uses exact same logic.
  *
- * Can also act as token refresh. Basically equivalent, only difference being how Magic gets didToken again.
+ * Token refresh and login are basically equivalent, only difference being how Magic gets the didToken again.
  *
- * Enable refresh mode via configuration param. Default `false`
+ * @param {object=} configuration
+ * @param {object=} configuration.magic Magic client dynamic import override. Can be the client val itself or a promise.
+ * @param {boolean=} configuration.refresh Enable `refresh` mode. Default `false`
  */
 export async function login({
   email = get(auth).userInfo?.email,
   refresh = false,
+  magic = magic(),
 }) {
+  const m = await Promise.resolve(magic)
   try {
     const didToken = await (refresh
       ? m.user.getIdToken()
@@ -115,7 +121,7 @@ export async function login({
 
 /** Remove token and log out of Magic, then go to login page */
 export async function logout() {
-  const mLogoutProm = m.user.logout()
+  const mLogoutProm = magic().then((m) => m.user.logout())
   localStorage.removeItem('token')
   localStorage.removeItem('exp')
   localStorage.removeItem('userInfo')
