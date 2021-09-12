@@ -10,7 +10,7 @@ import {
   query,
   mutation,
 } from '@urql/svelte'
-import { get, derived } from 'svelte/store'
+import { get } from 'svelte/store'
 // import { devtoolsExchange } from "@urql/devtools"; // ⚙ for dev only
 
 /** Fauna & Magic Link preconfigured urql client */
