@@ -22,11 +22,12 @@ export const initClient = () =>
     exchanges: [
       // devtoolsExchange, // ⚙ for dev only
       dedupExchange,
-      // offline-enabled graphcache https://formidable.com/open-source/urql/docs/graphcache/offline/
+      // offline-enabled graphcache https://waa.ai/graphcache-offline
       // ⚙ to swap, use cacheExchange from graphcache, and comment out `storage` property
       offlineExchange({
         schema,
         storage: makeDefaultStorage({ idbName: 'graphcache', maxAge: 7 }), // ⚙ Adjust cache duration in days
+        // Optimistic updates https://waa.ai/graphcache-optimistic
         optimistic: {
           // example optimistic update op
           // partialUpdateUser: (variables, cache, info) => ({
@@ -36,8 +37,7 @@ export const initClient = () =>
           // }),
         },
       }),
-      // auth exchange quick start https://github.com/FormidableLabs/urql/tree/main/exchanges/auth#quick-start-guide
-      // this exchange is async
+      // [async] auth exchange API: https://waa.ai/auth-exchange
       authExchange({
         addAuthToOperation: ({ authState, operation }) => {
           // Nothing to change, return the operation without changes
