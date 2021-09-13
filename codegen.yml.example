@@ -4,7 +4,6 @@ schema:
       headers:
         Authorization: YOUR-PUBLIC-FAUNA-API-KEY
         X-Schema-Preview: partial-update-mutation
-# documents: "src/lib/gql/*.js"
 generates:
   src/lib/gql/generated-introspection.json:
     plugins:
