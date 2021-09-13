@@ -132,9 +132,9 @@ const opFn =
       return queryFn(q, variables)
     }, Object.getOwnPropertyDescriptors(operationStore(gql)))
 
-/** Creates a query function store from a gql query.
+/** Query Operation Store: Creates a query function store from a gql query.
  *
  * usage detailed in https://waa.ai/gist-urql-patterns */
 export const queryOp = opFn(query)
-/** Creates a mutation function store from a gql query */
+/** Mutation Operation Store: Creates a mutation function store from a gql query */
 export const mutationOp = opFn(mutation)
