@@ -2,7 +2,7 @@ overwrite: true
 schema:
   - https://graphql.fauna.com/graphql:
       headers:
-#         Authorization: YOUR-PUBLIC-FAUNA-API-KEY
+        Authorization: YOUR-PUBLIC-FAUNA-API-KEY
         X-Schema-Preview: partial-update-mutation
 # documents: "src/lib/gql/*.js"
 generates:
