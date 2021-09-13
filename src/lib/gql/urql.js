@@ -23,9 +23,10 @@ export const initClient = () =>
       // devtoolsExchange, // ⚙ for dev only
       dedupExchange,
       // offline-enabled graphcache https://formidable.com/open-source/urql/docs/graphcache/offline/
+      // ⚙ to swap, use cacheExchange from graphcache, and comment out `storage` property
       offlineExchange({
         schema,
-        storage: makeDefaultStorage({ idbName: 'graphcache', maxAge: 7 }),
+        storage: makeDefaultStorage({ idbName: 'graphcache', maxAge: 7 }), // ⚙ Adjust cache duration in days
         optimistic: {
           // example optimistic update op
           // partialUpdateUser: (variables, cache, info) => ({
@@ -74,8 +75,13 @@ export const initClient = () =>
         },
         didAuthError: ({ error }) => {
           // Check if error was an auth error (can be implemented in various ways, e.g. 401 or a special error code)
-          return error.message == '[GraphQL] Invalid database secret.' // Auth error when secret invalid, possibly b/c
-          //                                                              of expired or forced logout
+          switch (error.message) {
+            case '[GraphQL] Invalid database secret.': // Secret invalid, possibly b/c of expired or forced logout
+            case '[GraphQL] Missing authorization header.': // Queried while not logged in / localStorage cleared / no public key
+              return true
+            default:
+              return false
+          }
         },
         getAuth: async ({ authState }) => {
           // No refresh token, refer to auth exchange quickstart for that
