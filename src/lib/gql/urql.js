@@ -9,34 +9,29 @@ import {
   query,
   mutation,
 } from '@urql/svelte'
-import { cacheExchange } from '@urql/exchange-graphcache'
+import { offlineExchange } from '@urql/exchange-graphcache'
+import { makeDefaultStorage } from '@urql/exchange-graphcache/default-storage'
 import schema from './generated-introspection.json'
 import { get } from 'svelte/store'
-import { devtoolsExchange } from '@urql/devtools' // ⚙ for dev only
+// import { devtoolsExchange } from '@urql/devtools' // ⚙ for dev only
 
 /** Fauna & Magic Link preconfigured urql client */
 export const initClient = () =>
   urqlInit({
     url: 'https://graphql.fauna.com/graphql',
     exchanges: [
-      devtoolsExchange, // ⚙ for dev only
+      // devtoolsExchange, // ⚙ for dev only
       dedupExchange,
-      cacheExchange({
+      // offline-enabled graphcache https://formidable.com/open-source/urql/docs/graphcache/offline/
+      offlineExchange({
         schema,
+        storage: makeDefaultStorage({ idbName: 'graphcache', maxAge: 7 }),
         optimistic: {
-          partialUpdateUser: (variables, cache, info) => {
-            console.log(variables)
-            return {
-              __typename: 'User',
-              email: variables.data.email,
-              _id: variables.id,
-            }
-          },
-        },
-        updates: {
-          partialUpdateUser(v, c, i) {
-            console.log(v, c, i)
-          },
+          partialUpdateUser: (variables, cache, info) => ({
+            __typename: 'User',
+            email: variables.data.email,
+            _id: variables.id,
+          }),
         },
       }),
       // auth exchange quick start https://github.com/FormidableLabs/urql/tree/main/exchanges/auth#quick-start-guide
