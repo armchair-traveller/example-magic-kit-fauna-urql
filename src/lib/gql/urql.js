@@ -88,8 +88,7 @@ export const initClient = () =>
 
           // For initial launch, fetch the auth state from storage (local storage, async storage, in-memory etc)
           if (!authState) {
-            const authState = get(auth)
-            if (authState.token) return authState
+            if ((authState = get(auth)) && authState.token) return authState
             // Can also implement redirect logic here if desired, but it's better to place that logic at the component
             // level, which can even be dynamically imported.
             return null
@@ -102,8 +101,7 @@ export const initClient = () =>
           // refresh if possible & return new auth state
           // ⚙ Uncomment block and update ttl of login FQL func in setup.fql to disable refreshing access tokens
           //   To get more security with refresh (no localStorage), check out the README
-          const payload = await login({ refresh: true })
-          if (payload) return payload // return new auth state
+          if ((authState = await login({ refresh: true }))) return authState // return new auth state
           // otherwise refresh failed
           // ***===***
 
