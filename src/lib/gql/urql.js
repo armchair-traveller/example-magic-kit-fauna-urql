@@ -27,11 +27,12 @@ export const initClient = () =>
         schema,
         storage: makeDefaultStorage({ idbName: 'graphcache', maxAge: 7 }),
         optimistic: {
-          partialUpdateUser: (variables, cache, info) => ({
-            __typename: 'User',
-            email: variables.data.email,
-            _id: variables.id,
-          }),
+          // example optimistic update op
+          // partialUpdateUser: (variables, cache, info) => ({
+          //   __typename: 'User',
+          //   email: variables.data.email,
+          //   _id: variables.id,
+          // }),
         },
       }),
       // auth exchange quick start https://github.com/FormidableLabs/urql/tree/main/exchanges/auth#quick-start-guide
