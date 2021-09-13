@@ -1,40 +1,6 @@
 <script>
-import { mutationOp, queryOp } from '$lib/gql/urql'
-import { gql, operationStore, mutation, query } from '@urql/svelte'
 //import { isAuthenticated } from '$lib/stores/auth'
 // console.log($isAuthenticated)
-const arm = query(
-  operationStore(gql`
-    query FindArmchair {
-      findUserByID(id: 309417338272219713) {
-        email
-        _id
-      }
-    }
-  `)
-)
-$: email = $arm.data?.findUserByID.email
-const changeEmail = mutation(
-  operationStore(gql`
-    mutation ChangeEmail($email: String!) {
-      partialUpdateUser(id: 309417338272219713, data: { email: $email }) {
-        email
-        _id
-      }
-    }
-  `)
-)
 </script>
 
 <a href="/login" sveltekit:prefetch>Login</a>
-{#if email}
-  <h1>
-    {email}
-  </h1>
-{/if}
-
-<button on:click={() => changeEmail({ email: 'I changed on home' })}
-  >Do da change</button
->
-
-<a href="/1" sveltekit:prefetch>Take me to another page</a>
