@@ -85,10 +85,11 @@ async function magic() {
 /** Handles login+signup or refresh. Returns new auth state & no return on errors. Signup uses exact same logic.
  *
  * Token refresh and login are basically equivalent, only difference being how Magic gets the didToken again.
- *
- * @param {object=} configuration
- * @param {object=} configuration.magic Magic client dynamic import override. Can be the client val itself or a promise.
- * @param {boolean=} configuration.refresh Enable `refresh` mode. Default `false`
+ * @param {LoginOptions?}
+ * @typedef {Object} LoginOptions
+ * @property {object} magic client dynamic import override. Can be the client val itself or a promise.
+ * @property {boolean} refresh Enable `refresh` mode. Default `false`
+ * @property {string} email
  */
 export async function login({
   email = get(auth).userInfo?.email,
