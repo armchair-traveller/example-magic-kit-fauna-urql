@@ -39,7 +39,7 @@ export const initClient = () =>
           // }),
         },
       }),
-      // [async] auth exchange API: https://waa.ai/auth-exchange
+      // [async] auth-exchange: https://waa.ai/auth-exchange
       authExchange({
         addAuthToOperation: ({ authState, operation }) => {
           // Nothing to change, return the operation without changes
