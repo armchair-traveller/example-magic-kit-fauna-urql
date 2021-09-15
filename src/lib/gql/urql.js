@@ -22,11 +22,13 @@ export const initClient = () =>
     exchanges: [
       // devtoolsExchange, // ⚙ for dev only
       dedupExchange,
-      // offline-enabled graphcache https://waa.ai/graphcache-offline
-      // ⚙ to swap, use cacheExchange from graphcache, and comment out `storage` property
+      // Offline enabled graphcache https://waa.ai/graphcache-offline // ⚙ To disable offline cache, swap to cacheExchange
       offlineExchange({
         schema,
+        // ⚙ To disable persistence comment out `storage`.
         storage: makeDefaultStorage({ idbName: 'graphcache', maxAge: 7 }), // ⚙ Adjust cache duration in days
+        // ? 7 days is a long time! Consider request-exchange to auto cache-network, or set request policy manually
+        //   or else it won't refetch for as long as it's in cache (default 7 days).
         // Optimistic updates https://waa.ai/graphcache-optimistic
         optimistic: {
           // example optimistic update op
