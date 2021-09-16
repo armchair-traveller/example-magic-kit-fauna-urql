@@ -1,10 +1,9 @@
-overwrite: true
 schema:
-  - https://graphql.fauna.com/graphql:
-      headers:
-        Authorization: YOUR-PUBLIC-FAUNA-API-KEY
-        X-Schema-Preview: partial-update-mutation
+  - https://graphql.fauna.com/graphql:
+      headers:
+        Authorization: Bearer YOUR-PUBLIC-FAUNA-API-KEY
+        X-Schema-Preview: partial-update-mutation
 generates:
-  src/lib/gql/generated-introspection.json:
-    plugins:
-      - "urql-introspection"
+  src/lib/gql/generated-introspection.json:
+    plugins:
+      - 'urql-introspection'
