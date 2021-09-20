@@ -15,6 +15,7 @@ Relevant parts:
   - `schema.gql`, `setup.fql`, `urql.js`
 - `login.svelte` - also acts as signup. Looking good 👩‍🍳 chef's kiss
 - `.env.example` - public env variables only, remove .example to use
+- `svelte.config.js` - vite config to alias web optimized GraphQL, b/c standard package is required for codegen introspection
 
 ## Config
 
