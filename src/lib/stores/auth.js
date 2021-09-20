@@ -87,7 +87,7 @@ async function magic() {
  * Token refresh and login are basically equivalent, only difference being how Magic gets the didToken again.
  * @param {LoginOptions?}
  * @typedef {Object} LoginOptions
- * @property {object} magic client dynamic import override. Can be the client val itself or a promise.
+ * @property {object} magic client dynamic import override. Can be the client itself or a promise resolving into it.
  * @property {boolean} refresh Enable `refresh` mode. Default `false`
  * @property {string} email
  */
