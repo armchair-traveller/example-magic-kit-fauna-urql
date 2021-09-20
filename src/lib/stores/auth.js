@@ -116,7 +116,7 @@ export async function login({
       }
     }
   } catch (error) {
-    console.log(error)
+    if (error.message.includes('-32602')) return false // invalid email error
   }
 }
 
