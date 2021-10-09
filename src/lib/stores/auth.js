@@ -24,9 +24,7 @@ export function setAuthState({ token, userInfo, exp }) {
   auth.set({ token, userInfo, exp })
 }
 
-export const isAuthenticated = derived(auth, ({ token, exp }) =>
-  !token || !exp ? false : new Date() < new Date(exp)
-)
+export const isAuthenticated = derived(auth, ({ token, exp }) => (!token || !exp ? false : new Date() < new Date(exp)))
 
 // *** Functions requiring async below ***
 
@@ -39,14 +37,14 @@ export const isAuthenticated = derived(auth, ({ token, exp }) =>
  *
  * To access raw fetch, use fetch prop. e.g. `apiQ.fetch()`
  */
-export const apiQ = {
+export const apiReq = {
   __proto__: new Proxy(
     {},
     {
       get:
         (target, prop) =>
         (route, init = {}) =>
-          apiQ.fetch(route, { method: prop.toUpperCase(), ...init }),
+          apiReq.fetch(route, { method: prop.toUpperCase(), ...init }),
     }
   ),
   /**
@@ -62,16 +60,8 @@ export const apiQ = {
       init.headers['Content-type'] = 'application/json'
     }
 
-    const resp = await fetch(
-      `${
-        import.meta.env.PROD
-          ? import.meta.env.VITE_API_URL
-          : import.meta.env.VITE_DEV_API_URL
-      }${route}`,
-      init
-    )
-    if (resp.headers.get('Content-type') == 'application/json')
-      return await resp.json()
+    const resp = await fetch(`/api${route}`, init)
+    if (resp.headers.get('Content-type') == 'application/json') return await resp.json()
 
     return resp
   },
@@ -91,11 +81,7 @@ async function magic() {
  * @property {boolean} refresh Enable `refresh` mode. Default `false`
  * @property {string} email
  */
-export async function login({
-  email = get(auth).userInfo?.email,
-  refresh = false,
-  magic = magic(),
-}) {
+export async function login({ email = get(auth).userInfo?.email, refresh = false, magic = magic() }) {
   const m = await Promise.resolve(magic)
   try {
     const didToken = await (refresh
@@ -105,7 +91,7 @@ export async function login({
         }))
     // Validate the did token on the server
     if (didToken) {
-      const authPayload = await apiQ.post('/login', {
+      const authPayload = await apiReq.post('/login', {
         headers: { Authorization: `Bearer ${didToken}` },
         body: { email },
       })
@@ -130,6 +116,3 @@ export async function logout() {
   await mLogoutProm
   goto('/login')
 }
-
-// example role checking
-// export const isAdmin = () => get(auth).userInfo?.role === 'admin'
