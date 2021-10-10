@@ -88,7 +88,7 @@ const client = createClient({
 })
 // export let client
 setClient(client)
-ssr.restoreData()
+browser && ssr.restoreData(window.__URQL_DATA__)
 op()
 console.log($op)
 // console.log(opResult)
