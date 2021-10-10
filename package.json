@@ -9,6 +9,8 @@
   "devDependencies": {
     "@graphql-codegen/cli": "^2.2.0",
     "@graphql-codegen/urql-introspection": "^2.1.0",
+    "@magic-ext/oauth": "^0.10.0",
+    "@sveltejs/adapter-netlify": "next",
     "@sveltejs/kit": "1.0.0-next.180",
     "@urql/exchange-auth": "^0.1.6",
     "@urql/exchange-graphcache": "^4.3.3",
@@ -21,8 +23,7 @@
     "postcss-load-config": "^3.1.0",
     "svelte": "^3.34.0",
     "svelte-preprocess": "^4.7.4",
-    "tailwindcss": "^2.2.4",
-    "@sveltejs/adapter-netlify": "next"
+    "tailwindcss": "^2.2.4"
   },
   "type": "module"
 }
