@@ -1,4 +1,4 @@
-import { auth, isAuthenticated, login, logout } from '$lib/stores/auth'
+// import { auth, isAuthenticated, login, logout } from '$lib/stores/auth'
 import { authExchange } from '@urql/exchange-auth'
 import {
   initClient as urqlInit,
@@ -9,113 +9,10 @@ import {
   query,
   mutation,
 } from '@urql/svelte'
-import { offlineExchange } from '@urql/exchange-graphcache'
-import { makeDefaultStorage } from '@urql/exchange-graphcache/default-storage'
-import schema from './generated-introspection.json'
 import { get } from 'svelte/store'
 // import { devtoolsExchange } from '@urql/devtools' // ⚙ for dev only
 
 /** Fauna & Magic Link preconfigured urql client */
-export const initClient = () =>
-  urqlInit({
-    url: 'https://graphql.fauna.com/graphql',
-    exchanges: [
-      // devtoolsExchange, // ⚙ for dev only
-      dedupExchange,
-      // Offline enabled graphcache https://waa.ai/graphcache-offline // ⚙ To disable offline cache, swap to cacheExchange
-      offlineExchange({
-        schema,
-        // ⚙ To disable persistence comment out `storage`.
-        storage: makeDefaultStorage({ idbName: 'graphcache', maxAge: 7 }), // ⚙ Adjust cache duration in days
-        // ? 7 days is a long time! Consider request-exchange to auto cache-network, or set request policy manually
-        //   or else it won't refetch for as long as it's in cache (default 7 days).
-        // Optimistic updates https://waa.ai/graphcache-optimistic
-        optimistic: {
-          // example optimistic update op
-          // partialUpdateUser: (variables, cache, info) => ({
-          //   __typename: 'User',
-          //   email: variables.data.email,
-          //   _id: variables.id,
-          // }),
-        },
-      }),
-      // [async] auth-exchange: https://waa.ai/auth-exchange
-      authExchange({
-        addAuthToOperation: ({ authState, operation }) => {
-          // Nothing to change, return the operation without changes
-          if (
-            !authState ||
-            !authState?.token
-            // && !import.meta.env.VITE_FAUNA_PUBLIC // ⚙ For fauna public role
-          )
-            return operation
-
-          // FetchOptions can be a function (See Client API) but you can simplify this based on usage
-          const fetchOptions =
-            typeof operation.context.fetchOptions == 'function'
-              ? operation.context.fetchOptions()
-              : operation.context.fetchOptions || {}
-
-          return makeOperation(operation.kind, operation, {
-            ...operation.context,
-            fetchOptions: {
-              ...fetchOptions,
-              headers: {
-                ...fetchOptions.headers,
-                Authorization: `Bearer ${
-                  authState?.token // || import.meta.env.VITE_FAUNA_PUBLIC// ⚙ for if you have a Fauna public role key
-                }`,
-                'X-Schema-Preview': 'partial-update-mutation',
-              },
-            },
-          })
-        },
-        willAuthError: ({ authState }) => {
-          // e.g. check for expiration, existence of auth etc
-          if (!authState || !get(isAuthenticated)) return true
-          return false
-        },
-        didAuthError: ({ error }) => {
-          // Check if error was an auth error (can be implemented in various ways, e.g. 401 or a special error code)
-          switch (error.message) {
-            case '[GraphQL] Invalid database secret.': // Secret invalid, possibly b/c of expired or forced logout
-            case '[GraphQL] Missing authorization header.': // Queried while not logged in / localStorage cleared / no public key
-              return true
-            default:
-              return false
-          }
-        },
-        getAuth: async ({ authState }) => {
-          // No refresh token, refer to auth exchange quickstart for that
-
-          // For initial launch, fetch the auth state from storage (local storage, async storage, in-memory etc)
-          if (!authState) {
-            if ((authState = get(auth)) && authState.token) return authState
-            // Can also implement redirect logic here if desired, but it's better to place that logic at the component
-            // level, which can even be dynamically imported.
-            return null
-          }
-
-          // The following code gets executed when an auth error has occurred
-
-          // ***===***
-          // Refresh Logic
-          // refresh if possible & return new auth state
-          // ⚙ Uncomment block and update ttl of login FQL func in setup.fql to disable refreshing access tokens
-          //   To get more security with refresh (no localStorage), check out the README
-          if ((authState = await login({ refresh: true }))) return authState // return new auth state
-          // otherwise refresh failed
-          // ***===***
-
-          // Your app logout logic should trigger here
-          await logout()
-
-          return null
-        },
-      }),
-      fetchExchange,
-    ],
-  })
 
 // Utils
 
