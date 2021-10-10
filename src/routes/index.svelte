@@ -28,69 +28,60 @@ let op = queryOp(gql`
 //   return v
 // })
 
-// export async function load({ page, fetch, session, context }) {
-//   // const ssr = ssrExchange({
-//   //   isClient: browser,
-//   //   initialState: browser ? window.__URQL_DATA__ : undefined,
-//   // })
-//   const ssr = ssrExchange({
-//   isClient: browser,
-//   initialState: browser ? window.__URQL_DATA__ : undefined,
-// })
-//   const client = createClient({
-//     url: 'https://graphql.anilist.co',
-//     fetch,
-//     exchanges: [
-//       dedupExchange,
-//       cacheExchange,
-//       ssr, // Add `ssr` in front of the `fetchExchange`
-//       fetchExchange,
-//     ],
-//   })
+export async function load({ page, fetch, session, context }) {
+  // const ssr = ssrExchange({
+  //   isClient: browser,
+  //   initialState: browser ? window.__URQL_DATA__ : undefined,
+  // })
+  const ssr = ssrExchange({
+    isClient: browser,
+    initialState: browser ? window.__URQL_DATA__ : undefined,
+  })
+  const client = createClient({
+    url: 'https://graphql.anilist.co',
+    fetch,
+    exchanges: [
+      dedupExchange,
+      cacheExchange,
+      ssr, // Add `ssr` in front of the `fetchExchange`
+      fetchExchange,
+    ],
+  })
 
-//   const articles = await client
-//     .query(
-//       gql`
-//         {
-//           __typename
-//         }
-//       `
-//     )
-//     .toPromise()
+  const articles = await client
+    .query(
+      gql`
+        {
+          __typename
+        }
+      `
+    )
+    .toPromise()
 
-//   console.log(articles)
-//   // console.log(client)
+  console.log(articles)
+  // console.log(client)
 
-//   return {
-//     props: {
-//       client,
-//     },
-//   }
-// }
+  return {
+    props: {
+      client,
+      data: ssr.extractData(),
+      ssr,
+    },
+  }
+}
 </script>
 
 <script>
+export let data, client, ssr
 // setClient(client)
 // op()
-const ssr = ssrExchange({
-  isClient: browser,
-  initialState: browser ? window.__URQL_DATA__ : undefined,
-})
-const client = createClient({
-  url: 'https://graphql.anilist.co',
-  fetch,
-  exchanges: [
-    dedupExchange,
-    cacheExchange,
-    ssr, // Add `ssr` in front of the `fetchExchange`
-    fetchExchange,
-  ],
-})
+
 // export let client
 setClient(client)
-browser && ssr.restoreData(window.__URQL_DATA__)
+browser && ssr.restoreData(data)
 op()
 console.log($op)
+console.log(client)
 // console.log(opResult)
 // $op.data = 'hi'
 // $op.fetching = false
