@@ -70,11 +70,11 @@ export async function load({ page, fetch, session, context }) {
 </script>
 
 <script>
-ssr.extractData()
 // setClient(client)
 // op()
 export let client
 setClient(client)
+ssr.restoreData()
 op()
 console.log($op)
 // console.log(opResult)
