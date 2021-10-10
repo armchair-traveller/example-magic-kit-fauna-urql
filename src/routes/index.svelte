@@ -37,7 +37,6 @@ export async function load({ page, fetch, session, context }) {
   //   isClient: browser,
   //   initialState: browser ? window.__URQL_DATA__ : undefined,
   // })
-
   const client = createClient({
     url: 'https://graphql.anilist.co',
     fetch,
@@ -59,6 +58,7 @@ export async function load({ page, fetch, session, context }) {
     )
     .toPromise()
 
+  console.log(articles)
   // console.log(client)
 
   return {
@@ -70,12 +70,14 @@ export async function load({ page, fetch, session, context }) {
 </script>
 
 <script>
-ssr.restoreData()
+// ssr.restoreData()
+// setClient(client)
+// op()
+export let client
+setClient(client)
 op()
 console.log($op)
-// export let client
 // console.log(opResult)
-// setClient(client)
 // $op.data = 'hi'
 // $op.fetching = false
 // console.log($op)
