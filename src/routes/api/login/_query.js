@@ -15,7 +15,7 @@ const client = createClient({
  * @type {client.query}
  */
 export function query(query, variables, ctx) {
-  return client.query(query, variables).toPromise()
+  return client.query(query, variables, ctx).toPromise()
 }
 
 export function mutation(query, variables, ctx) {
