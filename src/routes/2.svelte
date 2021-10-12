@@ -33,8 +33,9 @@ let op = queryOp(gql`
 // })
 
 export async function load({ page, fetch, session, context }) {
-  console.log(get(clientStore))
-
+  const browserClient = get(clientStore)
+  console.log(browserClient)
+  await browserClient.query(op.query).toPromise()
   // const ssr = ssrExchange({
   //   isClient: false,
   //   initialState: undefined,
@@ -87,7 +88,6 @@ const op2 = queryOp(gql`
   }
 `)
 
-op()
 //browser && ssr.restoreData(data)
 
 //setTimeout(() => op.reexecute({ requestPolicy: 'network-only' }), 3000)
@@ -120,6 +120,5 @@ op()
 
 <a sveltekit:prefetch href="/ssr">prefetch ssr</a>
 <a sveltekit:prefetch href="/csr">prefetch csr</a>
-<a sveltekit:prefetch href="/2">page 2</a>
 
 {JSON.stringify($op)}
